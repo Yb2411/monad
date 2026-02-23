@@ -94,6 +94,7 @@ struct Db::Impl
         size_t concurrency_limit) = 0;
     virtual void
     move_trie_version_fiber_blocking(uint64_t src, uint64_t dest) = 0;
+    virtual void reset_state_machine(StateMachine &) = 0;
 };
 
 AsyncIOContext::AsyncIOContext(ReadOnlyOnDiskDbConfig const &options)
@@ -250,12 +251,17 @@ public:
 
         return read_node_blocking(aux(), root_offset, version);
     }
+
+    virtual void reset_state_machine(StateMachine &) override
+    {
+        MONAD_ABORT();
+    }
 };
 
 class Db::InMemory final : public Db::Impl
 {
     UpdateAux aux_;
-    StateMachine &machine_;
+    std::reference_wrapper<StateMachine> machine_;
 
 public:
     explicit InMemory(StateMachine &machine)
@@ -316,6 +322,11 @@ public:
     virtual Node::SharedPtr load_root_for_version(uint64_t) override
     {
         return nullptr;
+    }
+
+    virtual void reset_state_machine(StateMachine &machine) override
+    {
+        machine_ = machine;
     }
 };
 
@@ -756,7 +767,7 @@ class Db::RWOnDisk final
     : public OnDiskWithWorkerThreadImpl
     , public Impl
 {
-    StateMachine &machine_;
+    std::reference_wrapper<StateMachine> machine_;
     bool const compaction_;
 
     uint64_t unflushed_version_{INVALID_BLOCK_NUM};
@@ -949,6 +960,11 @@ public:
             cond_.notify_one();
         }
         return fut.get();
+    }
+
+    virtual void reset_state_machine(StateMachine &machine) override
+    {
+        machine_ = machine;
     }
 };
 
@@ -1321,6 +1337,12 @@ bool Db::is_read_only() const
 uint64_t Db::get_history_length() const
 {
     return is_on_disk() ? impl_->aux().version_history_length() : 1;
+}
+
+void Db::reset_state_machine(StateMachine &machine)
+{
+    MONAD_ASSERT(impl_);
+    impl_->reset_state_machine(machine);
 }
 
 AsyncContext::AsyncContext(Db &db, size_t node_lru_max_mem)

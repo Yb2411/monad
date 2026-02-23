@@ -161,6 +161,8 @@ public:
 
     bool is_on_disk() const;
     bool is_read_only() const;
+
+    void reset_state_machine(StateMachine &);
 };
 
 // The following are not threadsafe. Please use async get from the RODb owning
