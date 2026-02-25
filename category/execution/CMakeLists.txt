@@ -38,6 +38,9 @@ add_library(
   "ethereum/chain/ethereum_mainnet_alloc.hpp"
   "ethereum/chain/genesis_state.cpp"
   "ethereum/chain/genesis_state.hpp"
+  "ethereum/chain/hive_net.cpp"
+  "ethereum/chain/hive_net.hpp"
+  "ethereum/chain/hive_net_alloc.hpp"
   # ethereum/core
   "ethereum/core/account.hpp"
   "ethereum/core/address.hpp"
