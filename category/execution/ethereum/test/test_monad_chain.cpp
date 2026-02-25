@@ -356,8 +356,8 @@ TYPED_TEST(
         GTEST_SKIP() << "reserve-balance checks are disabled before MONAD_FOUR";
     }
 
-    constexpr Address SENDER{1};
-    constexpr uint256_t BASE_FEE_PER_GAS = 10;
+    static constexpr Address SENDER{1};
+    static constexpr uint256_t BASE_FEE_PER_GAS = 10;
     auto const to_wei = [](uint64_t mon) {
         return uint256_t{mon} * 1000000000000000000ULL;
     };
