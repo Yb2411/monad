@@ -19,8 +19,8 @@
 #include <category/execution/ethereum/block_hash_buffer.hpp>
 #include <category/execution/ethereum/chain/ethereum_mainnet.hpp>
 #include <category/execution/ethereum/core/rlp/block_rlp.hpp>
-#include <category/execution/ethereum/execute_block.hpp>
 #include <category/execution/ethereum/db/page_storage_cache.hpp>
+#include <category/execution/ethereum/execute_block.hpp>
 #include <category/execution/ethereum/state2/block_state.hpp>
 #include <category/execution/ethereum/trace/rlp/call_frame_rlp.hpp>
 #include <category/execution/monad/chain/monad_mainnet.hpp>
@@ -161,7 +161,7 @@ TYPED_TEST(TraitsTest, call_frames_stress_test)
     block_hash_buffer.set(
         block.value().header.number - 1, block.value().header.parent_hash);
 
-    EthPageStorageCache cache{tdb};
+    NoopStorageCache cache{tdb};
     BlockState bs(tdb, cache, vm);
     BlockMetrics metrics;
 
@@ -316,7 +316,7 @@ TYPED_TEST(TraitsTest, assertion_exception)
     block_hash_buffer.set(
         block.value().header.number - 1, block.value().header.parent_hash);
 
-    EthPageStorageCache cache{tdb};
+    NoopStorageCache cache{tdb};
     BlockState bs(tdb, cache, vm);
     BlockMetrics metrics;
 
@@ -462,7 +462,7 @@ TYPED_TEST(TraitsTest, call_frames_refund)
     block_hash_buffer.set(
         block.value().header.number - 1, block.value().header.parent_hash);
 
-    EthPageStorageCache cache{tdb};
+    NoopStorageCache cache{tdb};
     BlockState bs(tdb, cache, vm);
     BlockMetrics metrics;
 

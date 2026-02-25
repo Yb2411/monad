@@ -19,11 +19,11 @@
 #include <category/execution/ethereum/block_hash_buffer.hpp>
 #include <category/execution/ethereum/chain/ethereum_mainnet.hpp>
 #include <category/execution/ethereum/core/account.hpp>
+#include <category/execution/ethereum/db/page_storage_cache.hpp>
 #include <category/execution/ethereum/db/trie_db.hpp>
 #include <category/execution/ethereum/evm.hpp>
 #include <category/execution/ethereum/evmc_host.hpp>
 #include <category/execution/ethereum/state2/block_state.hpp>
-#include <category/execution/ethereum/db/page_storage_cache.hpp>
 #include <category/execution/ethereum/state2/state_deltas.hpp>
 #include <category/execution/ethereum/state3/state.hpp>
 #include <category/execution/ethereum/tx_context.hpp>
@@ -78,7 +78,7 @@ TYPED_TEST(TraitsTest, create_with_insufficient)
     mpt::Db db{machine};
     db_t tdb{db};
     vm::VM vm;
-    EthPageStorageCache cache{tdb};
+    NoopStorageCache cache{tdb};
     BlockState bs{tdb, cache, vm};
     State s{bs, Incarnation{0, 0}};
 
@@ -136,7 +136,7 @@ TYPED_TEST(TraitsTest, create_insufficient_balance_nonce_bump)
     mpt::Db db{machine};
     db_t tdb{db};
     vm::VM vm;
-    EthPageStorageCache cache{tdb};
+    NoopStorageCache cache{tdb};
     BlockState bs{tdb, cache, vm};
     State s{bs, Incarnation{0, 0}};
 
@@ -214,7 +214,7 @@ TYPED_TEST(TraitsTest, eip684_existing_code)
     mpt::Db db{machine};
     db_t tdb{db};
     vm::VM vm;
-    EthPageStorageCache cache{tdb};
+    NoopStorageCache cache{tdb};
     BlockState bs{tdb, cache, vm};
     State s{bs, Incarnation{0, 0}};
 
@@ -277,7 +277,7 @@ TYPED_TEST(TraitsTest, create_nonce_out_of_range)
     mpt::Db db{machine};
     db_t tdb{db};
     vm::VM vm;
-    EthPageStorageCache cache{tdb};
+    NoopStorageCache cache{tdb};
     BlockState bs{tdb, cache, vm};
     State s{bs, Incarnation{0, 0}};
 
@@ -340,7 +340,7 @@ TYPED_TEST(TraitsTest, static_precompile_execution)
     mpt::Db db{machine};
     db_t tdb{db};
     vm::VM vm;
-    EthPageStorageCache cache{tdb};
+    NoopStorageCache cache{tdb};
     BlockState bs{tdb, cache, vm};
     State s{bs, Incarnation{0, 0}};
 
@@ -409,7 +409,7 @@ TYPED_TEST(TraitsTest, out_of_gas_static_precompile_execution)
     mpt::Db db{machine};
     db_t tdb{db};
     vm::VM vm;
-    EthPageStorageCache cache{tdb};
+    NoopStorageCache cache{tdb};
     BlockState bs{tdb, cache, vm};
     State s{bs, Incarnation{0, 0}};
 
@@ -524,7 +524,7 @@ TYPED_TEST(TraitsTest, create_op_max_initcode_size)
         },
         BlockHeader{});
 
-    EthPageStorageCache cache{tdb};
+    NoopStorageCache cache{tdb};
     BlockState bs{tdb, cache, vm};
     BlockHashBufferFinalized const block_hash_buffer;
     NoopCallTracer call_tracer;
@@ -646,7 +646,7 @@ TYPED_TEST(TraitsTest, create2_op_max_initcode_size)
         },
         BlockHeader{});
 
-    EthPageStorageCache cache{tdb};
+    NoopStorageCache cache{tdb};
     BlockState bs{tdb, cache, vm};
     BlockHashBufferFinalized const block_hash_buffer;
     NoopCallTracer call_tracer;
@@ -721,7 +721,7 @@ TYPED_TEST(TraitsTest, deploy_contract_code_not_enough_of_gas)
         StateDeltas{{a, StateDelta{.account = {std::nullopt, Account{}}}}},
         Code{},
         BlockHeader{});
-    EthPageStorageCache cache{tdb};
+    NoopStorageCache cache{tdb};
     BlockState bs{tdb, cache, vm};
 
     uint8_t const code[] = {0xde, 0xad, 0xbe, 0xef};
@@ -775,7 +775,7 @@ TYPED_TEST(TraitsTest, deploy_contract_code_max_code_size)
         StateDeltas{{a, StateDelta{.account = {std::nullopt, Account{}}}}},
         Code{},
         BlockHeader{});
-    EthPageStorageCache cache{tdb};
+    NoopStorageCache cache{tdb};
     BlockState bs{tdb, cache, vm};
 
     if constexpr (
@@ -814,7 +814,7 @@ TYPED_TEST(TraitsTest, deploy_contract_code_validation)
         StateDeltas{{a, StateDelta{.account = {std::nullopt, Account{}}}}},
         Code{},
         BlockHeader{});
-    EthPageStorageCache cache{tdb};
+    NoopStorageCache cache{tdb};
     BlockState bs{tdb, cache, vm};
 
     // EIP-3541 validation
@@ -844,7 +844,7 @@ TYPED_TEST(TraitsTest, create_inside_delegated_call)
     mpt::Db db{machine};
     db_t tdb{db};
     vm::VM vm;
-    EthPageStorageCache cache{tdb};
+    NoopStorageCache cache{tdb};
     BlockState bs{tdb, cache, vm};
     State s{bs, Incarnation{0, 0}};
 
@@ -949,7 +949,7 @@ TYPED_TEST(TraitsTest, create2_inside_delegated_call_via_delegatecall)
     mpt::Db db{machine};
     db_t tdb{db};
     vm::VM vm;
-    EthPageStorageCache cache{tdb};
+    NoopStorageCache cache{tdb};
     BlockState bs{tdb, cache, vm};
     State s{bs, Incarnation{0, 0}};
 
@@ -1080,7 +1080,7 @@ TYPED_TEST(TraitsTest, nested_call_to_delegated_precompile)
     mpt::Db db{machine};
     db_t tdb{db};
     vm::VM vm;
-    EthPageStorageCache cache{tdb};
+    NoopStorageCache cache{tdb};
     BlockState bs{tdb, cache, vm};
     State s{bs, Incarnation{0, 0}};
 
@@ -1189,7 +1189,7 @@ TYPED_TEST(TraitsTest, cold_account_access)
     mpt::Db db{machine};
     db_t tdb{db};
     vm::VM vm;
-    EthPageStorageCache cache{tdb};
+    NoopStorageCache cache{tdb};
     BlockState bs{tdb, cache, vm};
     State s{bs, Incarnation{0, 0}};
 
@@ -1297,7 +1297,7 @@ TYPED_TEST(TraitsTest, defensive_delegation_check)
     mpt::Db db{machine};
     db_t tdb{db};
     vm::VM vm;
-    EthPageStorageCache cache{tdb};
+    NoopStorageCache cache{tdb};
     BlockState bs{tdb, cache, vm};
     State s{bs, Incarnation{0, 0}};
 
