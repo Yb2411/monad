@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <category/core/byte_string.hpp>
+#include <category/core/likely.h>
 #include <category/execution/ethereum/precompiles.hpp>
 #include <category/execution/ethereum/precompiles_bls12.hpp>
 #include <category/vm/evm/explicit_traits.hpp>
@@ -21,6 +22,8 @@
 #include <intx/intx.hpp>
 
 #include <cstring>
+
+using uint256_t = ::intx::uint256;
 
 namespace
 {
