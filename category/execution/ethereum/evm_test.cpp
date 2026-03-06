@@ -53,6 +53,24 @@ using db_t = TrieDb;
 
 #define PUSH3(x) 0x62, (((x) >> 16) & 0xFF), (((x) >> 8) & 0xFF), ((x) & 0xFF)
 
+namespace
+{
+    template <Traits traits>
+    void init_rb_for_test(
+        State &state, EvmcHost<traits> &host, Address const &sender)
+    {
+        if constexpr (is_monad_trait_v<traits>) {
+            init_reserve_balance_context<traits>(
+                state,
+                sender,
+                host.tx_,
+                host.base_fee_per_gas_,
+                host.i_,
+                host.chain_ctx_);
+        }
+    }
+}
+
 TYPED_TEST(TraitsTest, create_with_insufficient)
 {
     InMemoryMachine machine;
@@ -102,6 +120,7 @@ TYPED_TEST(TraitsTest, create_with_insufficient)
         base_fee,
         0,
         chain_ctx};
+    init_rb_for_test<typename TestFixture::Trait>(s, h, Address{m.sender});
     auto const result = create<typename TestFixture::Trait>(&h, s, m);
 
     EXPECT_EQ(result.status_code, EVMC_INSUFFICIENT_BALANCE);
@@ -163,6 +182,7 @@ TYPED_TEST(TraitsTest, create_insufficient_balance_nonce_bump)
         base_fee,
         0,
         chain_ctx};
+    init_rb_for_test<typename TestFixture::Trait>(s, h, Address{m.sender});
 
     auto const result = create<typename TestFixture::Trait>(&h, s, m);
 
@@ -242,6 +262,7 @@ TYPED_TEST(TraitsTest, eip684_existing_code)
         base_fee,
         0,
         chain_ctx};
+    init_rb_for_test<typename TestFixture::Trait>(s, h, Address{m.sender});
     auto const result = create<typename TestFixture::Trait>(&h, s, m);
     EXPECT_EQ(result.status_code, EVMC_INVALID_INSTRUCTION);
 }
@@ -301,6 +322,7 @@ TYPED_TEST(TraitsTest, create_nonce_out_of_range)
     uint256_t const v{70'000'000};
     intx::be::store(m.value.bytes, v);
 
+    init_rb_for_test<typename TestFixture::Trait>(s, h, Address{m.sender});
     auto const result = create<typename TestFixture::Trait>(&h, s, m);
 
     EXPECT_FALSE(s.account_exists(new_addr));
@@ -347,6 +369,7 @@ TYPED_TEST(TraitsTest, static_precompile_execution)
                  .account = {std::nullopt, Account{.balance = 15'000}}}}},
         Code{},
         BlockHeader{});
+    init_rb_for_test<typename TestFixture::Trait>(s, h, Address{from});
 
     static constexpr char data[] = "hello world";
     static constexpr auto data_size = sizeof(data);
@@ -414,6 +437,7 @@ TYPED_TEST(TraitsTest, out_of_gas_static_precompile_execution)
                  .account = {std::nullopt, Account{.balance = 15'000}}}}},
         Code{},
         BlockHeader{});
+    init_rb_for_test<typename TestFixture::Trait>(s, h, Address{from});
 
     static constexpr char data[] = "hello world";
     static constexpr auto data_size = sizeof(data);
@@ -512,6 +536,7 @@ TYPED_TEST(TraitsTest, create_op_max_initcode_size)
         base_fee,
         0,
         chain_ctx};
+    init_rb_for_test<typename TestFixture::Trait>(s, h, Address{from});
 
     // Initcode fits inside size limit
     if constexpr (
@@ -632,6 +657,7 @@ TYPED_TEST(TraitsTest, create2_op_max_initcode_size)
         base_fee,
         0,
         chain_ctx};
+    init_rb_for_test<typename TestFixture::Trait>(s, h, Address{from});
 
     // Initcode fits inside size limit
     if constexpr (
@@ -888,6 +914,7 @@ TYPED_TEST(TraitsTest, create_inside_delegated_call)
         base_fee,
         0,
         chain_ctx};
+    init_rb_for_test<typename TestFixture::Trait>(s, h, Address{m.sender});
 
     if constexpr (TestFixture::Trait::evm_rev() >= EVMC_PRAGUE) {
         auto const result = h.call(m);
@@ -1017,6 +1044,7 @@ TYPED_TEST(TraitsTest, create2_inside_delegated_call_via_delegatecall)
         base_fee,
         0,
         chain_ctx};
+    init_rb_for_test<typename TestFixture::Trait>(s, h, Address{m.sender});
 
     if constexpr (TestFixture::Trait::evm_rev() >= EVMC_PRAGUE) {
         auto const result = h.call(m);
@@ -1132,6 +1160,7 @@ TYPED_TEST(TraitsTest, nested_call_to_delegated_precompile)
             base_fee,
             0,
             chain_ctx};
+        init_rb_for_test<typename TestFixture::Trait>(s, h, Address{m.sender});
 
         auto const result = h.call(m);
 
@@ -1212,6 +1241,7 @@ TYPED_TEST(TraitsTest, cold_account_access)
         base_fee,
         0,
         chain_ctx};
+    init_rb_for_test<typename TestFixture::Trait>(s, h, Address{m.sender});
     auto const result = h.call(m);
     auto const gas_used = gas_limit - result.gas_left;
 
